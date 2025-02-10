@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Table Viewer</title>
+    <script>
+        async function fetchCSV(file, tableId, buttonId) {
+            const response = await fetch(file);
+            const data = await response.text();
+            const rows = data.split("\n").map(row => row.split(","));
+            const table = document.getElementById(tableId);
+            table.innerHTML = "";
+            rows.forEach(row => {
+                let tr = document.createElement("tr");
+                row.forEach(cell => {
+                    let td = document.createElement("td");
+                    td.textContent = cell;
+                    tr.appendChild(td);
+                });
+                table.appendChild(tr);
+            });
+            document.getElementById(buttonId).style.display = "block";
+        }
+
+        function toggleTable(id) {
+            const tableContainer = document.getElementById(id);
+            tableContainer.style.display = tableContainer.style.display === "none" ? "block" : "none";
+        }
+
+        async function loadTables() {
+            await fetchCSV("single_folder/single.csv", "mainTable", "mainButton");
+            const files = ["csv_folder/file1.csv", "csv_folder/file2.csv"];
+            files.forEach((file, index) => {
+                let tableId = `table${index + 1}`;
+                let buttonId = `button${index + 1}`;
+                fetchCSV(file, tableId, buttonId);
+            });
+        }
+    </script>
+    <style>
+        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+        th, td { border: 1px solid black; padding: 8px; text-align: left; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body onload="loadTables()">
+    <h2>Main CSV File</h2>
+    <table id="mainTable"></table>
+    
+    <button id="mainButton" onclick="toggleTable('mainTable')">Hide/Show single.csv</button>
+    
+    <div id="otherCSVs">
+        <h2>Other CSV Files</h2>
+        <button id="button1" onclick="toggleTable('table1')" class="hidden">Hide/Show file1.csv</button>
+        <table id="table1" class="hidden"></table>
+        
+        <button id="button2" onclick="toggleTable('table2')" class="hidden">Hide/Show file2.csv</button>
+        <table id="table2" class="hidden"></table>
+    </div>
+</body>
+</html>
